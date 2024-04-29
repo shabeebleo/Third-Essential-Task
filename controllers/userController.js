@@ -12,7 +12,7 @@ dotenv.config();
 
 export const registerUser = async (req, res) => {
   try {
-    console.log(req.body, "req.body");
+    console.log(req.body, "req.body in registerUser");
     const { username, email, password } = req.body;
 
     const existingUser = await User.findOne({ email });

@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-// dotenv.config();
+import User from "../models/userModel.js"; // Assuming this is your user model
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -10,9 +10,21 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.jwtSecret);
 
-    req.user = decoded;
+    const decoded = jwt.verify(token, process.env.jwtSecret);
+    
+
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+
+    req.user = {
+      id: user._id,
+      username: user.username
+    
+    };
 
     next();
   } catch (error) {
