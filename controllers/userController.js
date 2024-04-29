@@ -1,4 +1,5 @@
 import User from "../models/userModel.js";
+import UserActivity from "../models/userActivityModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -46,7 +47,6 @@ export const registerUser = async (req, res) => {
 
 
 //loginUser 
-
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -62,11 +62,20 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    const payload = { userId: user._id };
+    // Create user activity for login
+    const userActivity = new UserActivity({
+      user: user._id, // Associate with the logged-in user
+      loginTime: new Date() // Record the login time
+    });
+    await userActivity.save();
+
+    // Generate JWT token
+    const payload = { userId: user.id };
     const token = jwt.sign(payload, process.env.jwtSecret, {
       expiresIn: process.env.expiresIn,
     });
 
+    // Respond with success message and token
     return res
       .setHeader("Authorization", `Bearer ${token}`)
       .status(200)
@@ -76,3 +85,26 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
+export const logoutUser = async (req, res) => {
+  try {
+    // Find the latest user activity document for the current user
+    const latestActivity = await UserActivity.findOne({ user: req.user.id }).sort({ loginTime: -1 });
+
+    if (!latestActivity) {
+      return res.status(400).json({ message: "No user activity found" });
+    }
+
+    // Update the latest user activity document with the logout time
+    latestActivity.logoutTime = new Date();
+    await latestActivity.save();
+
+    // Respond with a success message
+    res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+

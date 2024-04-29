@@ -4,7 +4,7 @@ import Product from "../models/productModel.js";
 export const productList = async (req, res) => {
   try {
     // Fetch products specific to the logged-in user
-    const products = await Product.find({ users: req.user._id }).populate("users", "username email");
+    const products = await Product.find({ users: req.user.id }).populate("users", "username email");
 
     res.status(200).json(products);
   } catch (error) {
@@ -39,7 +39,8 @@ export const createProduct = async (req, res) => {
 // Edit a product
 export const editProduct = async (req, res) => {
   try {
-    const { productId } = req.params;
+    const  productId  = req.params.productId;
+    console.log(productId,"productIdproductId");
     const { name, description, price, image } = req.body;
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -58,7 +59,7 @@ export const editProduct = async (req, res) => {
 // Delete a product
 export const deleteProduct = async (req, res) => {
   try {
-    const { productId } = req.params;
+    const  productId  = req.params.productId;
 
     await Product.findByIdAndDelete(productId);
 

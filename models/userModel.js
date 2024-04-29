@@ -7,6 +7,9 @@ const userSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   products: [{ type: Schema.Types.ObjectId, ref: "Product" }],
+  loginTimes: [{ type: Date }], // Track login times
+  productsCreated: [{ type: Schema.Types.ObjectId, ref: 'Product' }], // Reference to created products
+  productsUpdated: [{ type: Schema.Types.ObjectId, ref: 'Product' }] // Reference to updated products
 });
 
 export default mongoose.model("User", userSchema);

@@ -20,6 +20,9 @@ app.use('/users', userRoutes);
 // Admin routes
 app.use('/admins', adminRoutes);
 
+
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
   });
