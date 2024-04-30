@@ -1,4 +1,5 @@
 import Product from "../models/productModel.js";
+import User from "../models/userModel.js";
 
 // Get user-specific product list
 export const productList = async (req, res) => {
@@ -16,18 +17,27 @@ export const productList = async (req, res) => {
 // Create a new product
 export const createProduct = async (req, res) => {
   try {
-    console.log(req.body,"req.body in create product")
     const { name, description, price, image } = req.body;
-
+    const createdBy = req.user.id;
+    const updatedBy = req.user.id;
+    
+    // Create new product
     const newProduct = new Product({
       name,
       description,
       price,
       image,
-      users: [req.user.id], // Associate the product with the logged-in user
+      createdBy,
+      updatedBy
     });
-
+    
+    // Save the new product
     await newProduct.save();
+
+    // Update the user who created the product
+    await User.findByIdAndUpdate(createdBy, {
+      $push: { products: newProduct._id, productsCreated: newProduct._id }
+    });
 
     res.status(201).json({ message: "Product created successfully" });
   } catch (error) {
@@ -39,15 +49,21 @@ export const createProduct = async (req, res) => {
 // Edit a product
 export const editProduct = async (req, res) => {
   try {
-    const  productId  = req.params.productId;
-    console.log(productId,"productIdproductId");
+    const productId = req.params.productId;
     const { name, description, price, image } = req.body;
+    const updatedBy = req.user.id;
 
+    // Update the product
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
-      { name, description, price, image },
+      { name, description, price, image, updatedBy },
       { new: true }
     );
+
+    // Update the user who updated the product
+    await User.findByIdAndUpdate(updatedBy, {
+      $push: { productsUpdated: productId }
+    });
 
     res.status(200).json({ message: "Product updated successfully", product: updatedProduct });
   } catch (error) {

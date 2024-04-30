@@ -3,7 +3,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import User from "../models/userModel.js";
-import UserActivity from "../models/userActivityModel.js";
+import Product from "../models/productModel.js";
+// import UserActivity from "../models/userActivityModel.js";
 dotenv.config();
 
 // Register Admin
@@ -103,22 +104,45 @@ export const registerUser = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 // Controller function to fetch user-specific activity for the super admin
 export const userActivity = async (req, res) => {
+  console.log("userActivity")
   try {
-    // Fetch user activity from the 'UserActivity' collection
-    const userActivity = await UserActivity.find()
-      .populate("user", "name") // Populate the 'user' field with the 'name'
-      .populate("productsCreated", "name description price") // Populate the 'productsCreated' field with product details
-      .populate("productsUpdated", "name description price") // Populate the 'productsUpdated' field with product details
-      .sort({ loginTime: -1 }); // Sort the results by loginTime in descending order
+    // Fetch user activity from the 'User' collection
+    const users = await User.find({}, 'username loginTimes logoutTimes productsCreated productsUpdated');
 
-    // Return the fetched user activity
-    res.status(200).json(userActivity);
+    // Construct an array to store user activities
+    const userActivities = [];
+
+    // Iterate over each user
+    for (const user of users) {
+      // Construct an object to store user activity details
+      const userActivity = {
+        username: user.username,
+        loginTimes: user.loginTimes,
+        logoutTimes: user.logoutTimes,
+        productsCreated: [],
+        productsUpdated: []
+      };
+
+      // Fetch product details for products created by the user
+      const createdProducts = await Product.find({ _id: { $in: user.productsCreated } }, 'name description price');
+      userActivity.productsCreated = createdProducts;
+
+      // Fetch product details for products updated by the user
+      const updatedProducts = await Product.find({ _id: { $in: user.productsUpdated } }, 'name description price');
+      userActivity.productsUpdated = updatedProducts;
+
+      // Push user activity to the array
+      userActivities.push(userActivity);
+    }
+
+    // Return the fetched user activities
+    res.status(200).json(userActivities);
   } catch (error) {
     // Handle any errors that occur during the operation
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
-

@@ -62,12 +62,9 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    // Create user activity for login
-    const userActivity = new UserActivity({
-      user: user._id, // Associate with the logged-in user
-      loginTime: new Date() // Record the login time
-    });
-    await userActivity.save();
+    // Update user's login times
+    user.loginTimes.push(new Date());
+    await user.save();
 
     // Generate JWT token
     const payload = { userId: user.id };
@@ -89,16 +86,16 @@ export const loginUser = async (req, res) => {
 
 export const logoutUser = async (req, res) => {
   try {
-    // Find the latest user activity document for the current user
-    const latestActivity = await UserActivity.findOne({ user: req.user.id }).sort({ loginTime: -1 });
+    // Find the current user
+    const user = await User.findById(req.user.id);
 
-    if (!latestActivity) {
-      return res.status(400).json({ message: "No user activity found" });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
     }
 
-    // Update the latest user activity document with the logout time
-    latestActivity.logoutTime = new Date();
-    await latestActivity.save();
+    // Update the user's logout time
+    user.logoutTimes.push(new Date());
+    await user.save();
 
     // Respond with a success message
     res.status(200).json({ message: "Logout successful" });
@@ -107,4 +104,3 @@ export const logoutUser = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-

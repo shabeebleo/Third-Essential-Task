@@ -7,9 +7,10 @@ const productSchema = new Schema({
   description: { type: String },
   price: { type: Number, required: true },
   image: { type: String },
-  users: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  // users: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' }, // Reference to the user who created the product
   updatedBy: { type: Schema.Types.ObjectId, ref: 'User' }, // Reference to the user who last updated the product
+  deletedBy:{ type: Schema.Types.ObjectId, ref: 'User' },
   createdAt: { type: Date, default: Date.now }, // Timestamp when the product was created
   updatedAt: { type: Date } // Timestamp when the product was last updated
 });

@@ -9,7 +9,8 @@ const userSchema = new Schema({
   products: [{ type: Schema.Types.ObjectId, ref: "Product" }],
   loginTimes: [{ type: Date }], // Track login times
   productsCreated: [{ type: Schema.Types.ObjectId, ref: 'Product' }], // Reference to created products
-  productsUpdated: [{ type: Schema.Types.ObjectId, ref: 'Product' }] // Reference to updated products
+  productsUpdated: [{ type: Schema.Types.ObjectId, ref: 'Product' }], // Reference to updated products
+  logoutTimes: [{ type: Date }] // Logout time
 });
 
 export default mongoose.model("User", userSchema);
