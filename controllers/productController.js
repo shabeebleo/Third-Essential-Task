@@ -5,8 +5,7 @@ import User from "../models/userModel.js";
 export const productList = async (req, res) => {
   try {
     // Fetch products specific to the logged-in user
-    const products = await Product.find({ users: req.user.id }).populate("users", "username email");
-
+    const products = await Product.find({ createdBy: req.user.id });
     res.status(200).json(products);
   } catch (error) {
     console.error(error);

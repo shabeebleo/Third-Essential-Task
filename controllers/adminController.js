@@ -65,7 +65,27 @@ export const loginAdmin = async (req, res) => {
     return res
       .setHeader("Authorization", `Bearer ${token}`)
       .status(200)
-      .json({ message: "Login successful" });
+      .json({ message: "Login successful" ,success:true,token:{token}});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+//logout
+
+export const logoutAdmin = async (req, res) => {
+  console.log("logoutAdmin");
+  try {
+    // Find the current admin
+    const admin = await Admin.findById(req.admin.id);
+    console.log(admin, "admin in logout");
+    if (!admin) {
+      return res.status(400).json({ message: "Admin not found" });
+    }
+
+      // Respond with a success message
+    res.status(200).json({ message: "Admin logout successful" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -74,11 +94,12 @@ export const loginAdmin = async (req, res) => {
 
 
 
-
 // Controller function to fetch the list of users
 export const userList = async (req, res) => {
   try {
-    const users = await User.find({}, "username email phone address"); // Fetch users with specified fields
+    const users = await User.find();
+   
+   
     res.status(200).json(users);
   } catch (error) {
     console.error(error);
@@ -87,16 +108,23 @@ export const userList = async (req, res) => {
 };
 
 // Controller function to register a new user
+
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, phone, address } = req.body;
+    console.log(req.body,"req.body in resister userrrr");
+    const { username, email, phone, address, password } = req.body;
+
     // Check if the email is already registered
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
     }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // Create a new user
-    const newUser = new User({ name, email, phone, address });
+    const newUser = new User({ username, email, phone, address, password: hashedPassword });
     await newUser.save();
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
@@ -104,7 +132,6 @@ export const registerUser = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 // Controller function to fetch user-specific activity for the super admin
 export const userActivity = async (req, res) => {
   console.log("userActivity")
@@ -127,11 +154,11 @@ export const userActivity = async (req, res) => {
       };
 
       // Fetch product details for products created by the user
-      const createdProducts = await Product.find({ _id: { $in: user.productsCreated } }, 'name description price');
+      const createdProducts = await Product.find({ _id: { $in: user.productsCreated } }, 'name description price image createdAt updatedAt');
       userActivity.productsCreated = createdProducts;
 
       // Fetch product details for products updated by the user
-      const updatedProducts = await Product.find({ _id: { $in: user.productsUpdated } }, 'name description price');
+      const updatedProducts = await Product.find({ _id: { $in: user.productsUpdated } }, 'name description price image createdAt updatedAt');
       userActivity.productsUpdated = updatedProducts;
 
       // Push user activity to the array

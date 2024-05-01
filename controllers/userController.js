@@ -1,20 +1,16 @@
 import User from "../models/userModel.js";
-import UserActivity from "../models/userActivityModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-
-
-
 //Register User
 
 export const registerUser = async (req, res) => {
   try {
     console.log(req.body, "req.body in registerUser");
-    const { username, email, password } = req.body;
+    const { username, email, password,address } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -45,13 +41,14 @@ export const registerUser = async (req, res) => {
   }
 };
 
-
-//loginUser 
+//loginUser
 export const loginUser = async (req, res) => {
+  console.log("loginUserloginUser");
   try {
     const { email, password } = req.body;
+    console.log(email, password, "loginUser");
     const user = await User.findOne({ email });
-
+    console.log(user, "loginUser");
     if (!user) {
       return res.status(400).json({ message: "Invalid email" });
     }
@@ -76,19 +73,19 @@ export const loginUser = async (req, res) => {
     return res
       .setHeader("Authorization", `Bearer ${token}`)
       .status(200)
-      .json({ message: "Login successful" });
+      .json({ success: true, message: "Login successful", token: { token } });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-
 export const logoutUser = async (req, res) => {
+  console.log("logoutUserlogoutUser");
   try {
     // Find the current user
     const user = await User.findById(req.user.id);
-
+    console.log(user, "user in logout");
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
