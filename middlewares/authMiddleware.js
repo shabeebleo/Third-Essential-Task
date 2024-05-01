@@ -52,7 +52,7 @@ console.log(user,"userrrrr");
       return res.status(401).json({ message: "Unauthorized" });
     } else {
     
-      return res.status(500).json({ message: "Internal server error" });
+      return res.status(500).json({ message: "Internal server error",logOut:true});
     }
   }
 };
