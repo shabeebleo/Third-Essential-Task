@@ -43,12 +43,10 @@ export const registerUser = async (req, res) => {
 
 //loginUser
 export const loginUser = async (req, res) => {
-  console.log("loginUserloginUser");
+  
   try {
     const { email, password } = req.body;
-    console.log(email, password, "loginUser");
     const user = await User.findOne({ email });
-    console.log(user, "loginUser");
     if (!user) {
       return res.status(400).json({ message: "Invalid email" });
     }
@@ -81,11 +79,10 @@ export const loginUser = async (req, res) => {
 };
 
 export const logoutUser = async (req, res) => {
-  console.log("logoutUserlogoutUser");
   try {
     // Find the current user
     const user = await User.findById(req.user.id);
-    console.log(user, "user in logout");
+
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }

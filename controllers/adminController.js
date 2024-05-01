@@ -75,11 +75,11 @@ export const loginAdmin = async (req, res) => {
 //logout
 
 export const logoutAdmin = async (req, res) => {
-  console.log("logoutAdmin");
+
   try {
     // Find the current admin
     const admin = await Admin.findById(req.admin.id);
-    console.log(admin, "admin in logout");
+   
     if (!admin) {
       return res.status(400).json({ message: "Admin not found" });
     }
@@ -134,16 +134,20 @@ export const registerUser = async (req, res) => {
 };
 // Controller function to fetch user-specific activity for the super admin
 export const userActivity = async (req, res) => {
-  console.log("userActivity")
+
+  const userId = req.params.id;
+  console.log(userId,"userActivity")
   try {
     // Fetch user activity from the 'User' collection
-    const users = await User.find({}, 'username loginTimes logoutTimes productsCreated productsUpdated');
+   
+    const user = await User.findById(userId, 'username loginTimes logoutTimes productsCreated productsUpdated');
+console.log(user);
 
     // Construct an array to store user activities
     const userActivities = [];
 
     // Iterate over each user
-    for (const user of users) {
+  
       // Construct an object to store user activity details
       const userActivity = {
         username: user.username,
@@ -163,8 +167,8 @@ export const userActivity = async (req, res) => {
 
       // Push user activity to the array
       userActivities.push(userActivity);
-    }
-
+  
+console.log(userActivities)
     // Return the fetched user activities
     res.status(200).json(userActivities);
   } catch (error) {

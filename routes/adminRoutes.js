@@ -13,6 +13,6 @@ router.post("/login/", loginAdmin);
 // User routes
 router.get("/users",authMiddleware, userList); // Route to fetch user list
 router.post("/users/register",authMiddleware, registerUser); // Route to register a user
-router.get("/users/activity",authMiddleware, userActivity); // Route to fetch user activity
+router.get("/users/activity/:id",authMiddleware, userActivity); // Route to fetch user activity
 
 export default router;
